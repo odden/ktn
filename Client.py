@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import socket
 import threading
+import json
 
 class Client:
     """
     This is the chat client class
     """
 
-    def __init__(self, host, server_port):
+    def __init__(self):
         """
         This method is run when creating a new Client object
         """
@@ -17,25 +18,43 @@ class Client:
         self.run()
 
         # TODO: Finish init process with necessary code
-        threading.Thread.__init__(self)
-        self.login = False
-        self.username = ""
 
 
-    def run(self):
+    def run(self, host, server_port):
         # Initiate the connection to the server
+        self.__init__()
         self.connection.connect((self.host, self.server_port))
+
+        self.login = False
+
+        while not login:
+            self.username = raw_input('Username: ')
+            self.login()
+
+        self.threading = threading.Thread(target = self.receive_message)
+        self.threading.setDeamon(True)
+        self.threading.start()
+
+    def login(self):
+        self.send(self.parse({'request':'login', 'username':self.username}))
+        login = True
 
     def disconnect(self):
         # TODO: Handle disconnection
-        pass
+        self.send(self.parse({'request':'logout'}))
 
     def receive_message(self, message):
         # TODO: Handle incoming message
+        while(login):
+            data = raw_input()
+
+            received = connection.recv(1024)
+            self.send(self.parse({'request':'msg', 'content' }))
         pass
 
     def send_payload(self, data):
         # TODO: Handle sending of a payload
+        self.connection.sendall(data)
         pass
 
 
