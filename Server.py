@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+from datetime import datetime
+import threading
+import json
+import re
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -20,10 +24,22 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
         # Loop that listens for messages from the client
         while True:
-            received_string = self.connection.recv(4096)
-            
+            received_string = self.connection.recv(4096).strip()
+            if received_string:
+                print(received_string)
+                self.handle_data(received_string)
+            else:
+                print('The client is disconnected.')
+                break            
             # TODO: Add handling of received payload from client
 
+    def login(self, username):
+        if not re.match(r'^[A-Za-z0-9_]+$', username): #A-Z a-z 0-9
+            send({'response':'login', 'error:':'invalid username', 'username':username})
+            return
+
+    def send(self, data):
+        self.request.sendall(json.dumps(data))
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
