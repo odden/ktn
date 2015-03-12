@@ -23,6 +23,7 @@ class Client:
     def run(self, host, server_port):
         # Initiate the connection to the server
         self.__init__()
+        print "Welcome to AwzmChat<3 write something awezome"
         self.connection.connect((self.host, self.server_port))
 
         self.login = False
@@ -34,6 +35,10 @@ class Client:
         self.threading = threading.Thread(target = self.receive_message)
         self.threading.setDeamon(True)
         self.threading.start()
+
+        while login:
+            
+
 
     def login(self):
         self.send(self.parse({'request':'login', 'username':self.username}))
