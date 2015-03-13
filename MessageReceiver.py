@@ -15,9 +15,17 @@ class MessageReceiver(Thread):
 
         # Flag to run thread as a deamon
         self.daemon = True
+        self.listener = client
+        self.connection = connection
+        super(ReceiveMessageWorker, self).__init__()
 
         # TODO: Finish initialization of MessageReceiver
 
+
     def run(self):
         # TODO: Make MessageReceiver receive and handle payloads
-        pass
+        while True:
+            data = self.connection.recv(1024).strip()
+            if data:
+                self.listener.message_received(data, self.connection)
+
