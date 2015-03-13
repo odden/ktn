@@ -110,6 +110,9 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     No alterations is necessary
     """
     allow_reuse_address = True
+    self.listener = listener
+    self.connection = connection
+    super(ReceiveMessageWorker, self).__init__()
 
 if __name__ == "__main__":
     """
