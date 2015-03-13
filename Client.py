@@ -26,9 +26,9 @@ class Client:
         print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
         self.connection.connect((self.host, self.server_port))
 
-        self.login = False
+        self.logged_in = False
 
-        while not login:
+        while not logged_in:
             self.username = raw_input('Username: ')
             self.login()
             resp = self.connection.recv(1024).strip()
@@ -38,7 +38,7 @@ class Client:
         self.thread.setDeamon(True)
         self.thread.start()
 
-        while login:
+        while logged_in:
             receive_message()
 
         self.connection.close()
@@ -46,7 +46,7 @@ class Client:
 
     def login(self):
         self.send(self.parse({'request':'login', 'username':self.username}))
-        login = True
+        logged_in = True
 
     def disconnect(self):
         # TODO: Handle disconnection
