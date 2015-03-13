@@ -14,6 +14,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
 
+    active_users = []
+
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -33,13 +35,30 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 break            
             # TODO: Add handling of received payload from client
 
-    def login(self, username):
-        if not re.match(r'^[A-Za-z0-9_]+$', username): #A-Z a-z 0-9
-            send({'response':'login', 'error:':'invalid username', 'username':username})
-            return
-
     def send(self, data):
         self.request.sendall(json.dumps(data))
+
+    def timestamp():
+        return str(datetime.now())
+
+    def login(self, username):
+        if not re.match('[A-Za-z0-9_]{2,}', username): #A-Z a-z 0-9
+            send({'timestamp':timestamp(), 'sender':username, 'response':'login', 'error':'invalid username'})
+            return
+        if not in active_users:
+            send({'timestamp':timestamp(), 'sender':username, 'response':'login', 'info':'login was successfull'})
+        else:
+            send({'timestamp':timestamp(), 'sender':username, 'response':'login', 'error':'already logged in'})
+        return
+
+    def logout(self, username):
+        if not in active_users:
+            send({'timestamp':timestamp(), 'sender':username, 'response':'logout', 'error':'you suck'})
+        else:
+            send({'timestamp':timestamp(), 'sender':username, 'response':'logout', 'info':'successfully logged out'})
+
+    def message():
+        pass
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
