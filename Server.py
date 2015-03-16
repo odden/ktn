@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import SocketServer
 from datetime import datetime
-import threading
+#import threading
 import json
 import re
 
@@ -19,6 +19,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     global active_users
     global msg_history
 
+    def printPretty(self, username, message):
+        return timestamp() + " " + username + " | " + message
+
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -32,14 +35,29 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         while True:
             received_string = self.connection.recv(4096).strip()
             if received_string:
-                print(received_string)
-                self.handle_data(received_string)
+                jsonObject = json.loads(received_string)
+                request = jsonObject.get('request')
+                #print(received_string)
+                #self.handle_data(received_string)
+                if request == 'login':
+                    self.login(jsonObject)
+                elif request == 'logout':
+                    self.logout()
+                elif request == 'msg':
+                    self.send(jsonObject)
+                elif request == 'names':
+                    self.getNames()
+                elif request == 'help':
+                    return "geiegohruuhiegr"
+                else:
+                    return "you suck"
+
             else:
                 print('The client is disconnected.')
                 break            
             # TODO: Add handling of received payload from client
 
-    #sends 
+    #sends requests from the server to the client
     def send(self, data):
         self.request.sendall(json.dumps(data))
 
@@ -51,17 +69,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def broadcast(self, data):
         msg_history.append(data)
 
-    def login(self, username):
+    def login(self, jsonObject):
+        username = jsonObject.get('username')
+
         if not re.match('[A-Za-z0-9_]{2,}', username): #A-Z a-z 0-9
             send({'timestamp':timestamp(), 'sender':username, 'response':'error', 'content':'invalid username :('})
             return
-        if not in active_users:
+        elif username not in active_users:
             self.username = username
             active_users.append(username)
             self.logged_in = True
             send({'timestamp':timestamp(), 'sender':self.username, 'response':'info', 'content':'login was successfull'})
             self.broadcast('<3 ' + self.username + ' joined AwzmChat<3.')
-            history()
+            #history()
         else:
             send({'timestamp':timestamp(), 'sender':username, 'response':'error', 'content':'already logged in or name already taken :('})
 
@@ -74,33 +94,38 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         except Exception, e:
             send({'timestamp':timestamp(), 'sender':self.username, 'response':'error', 'content':'when not logged in you can only use the login and help request!'})
 
+    def sendMsg(self, jsonObject):
+        username = jsonObject.get('username')
+        if username not in active_users:
+            send({'timestamp':timestamp(), 'sender':None, 'response':'error', 'content':'Not logged in'})
+        else:
+            message = jsonObject.get('message')
+            printPretty(self, username, message)
+            send({'timestamp':timestamp(), 'sender':username, 'response':'info', 'content':'YEYEEYYEYEY'})
+            msg_history.append(message)
+
+
     #sends message history to users who just logged in
-    def history(self):
-        send({'timestamp':timestamp(), 'user':username, 'response':'history', 'content':msg_history})
+    # def history(self):
+    #     send({'timestamp':timestamp(), 'user':username, 'response':'history', 'content':msg_history})
 
-    def disconnect(self):
-        try:
-            active_users.remove(self.username)
-        except:
-            pass
+    # def handle_data(self, data):
+    #     decoded = json.loads(data)
 
-    def handle_data(self, data):
-        decoded = json.loads(data)
+    #     if decoded['request'] == 'login':
+    #         self.login(decoded.get('username', ''))
 
-        if decoded['request'] == 'login':
-            self.login(decoded.get('username', ''))
+    #     if not self.logged_in:
+    #         return
 
-        if not self.logged_in:
-            return
+    #     if decoded['request'] == 'logout':
+    #         self.logout()
 
-        if decoded['request'] == 'logout':
-            self.logout()
-
-        if decoded['request'] == 'message':
-            if decoded.get('message', '') != '':
-                p = ' '*(len(max(active_users, key=len))-len(self.username))
-                msg = self.timestamp() + p + ' %s| %s'%(self.username, decoded['message'])
-                self.broadcast(msg)
+    #     if decoded['request'] == 'message':
+    #         if decoded.get('message', '') != '':
+    #             p = ' '*(len(max(active_users, key=len))-len(self.username))
+    #             msg = self.timestamp() + p + ' %s| %s'%(self.username, decoded['message'])
+    #             self.broadcast(msg)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
@@ -110,9 +135,11 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     No alterations is necessary
     """
     allow_reuse_address = True
-    self.listener = listener
-    self.connection = connection
-    super(ReceiveMessageWorker, self).__init__()
+
+    def broadcast(self, message):
+        for user in self.active_users:
+            user.sendall(message)
+ 
 
 if __name__ == "__main__":
     """
@@ -121,7 +148,7 @@ if __name__ == "__main__":
 
     No alterations is necessary
     """
-    HOST, PORT = 'localhost', 9998
+    HOST, PORT = 'localhost', 9996
     print 'Server running...'
 
     # Set up and initiate the TCP server

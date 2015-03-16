@@ -17,7 +17,7 @@ class MessageReceiver(Thread):
         self.daemon = True
         self.listener = client
         self.connection = connection
-        super(ReceiveMessageWorker, self).__init__()
+        super(MessageReceiver, self).__init__()
 
         # TODO: Finish initialization of MessageReceiver
 

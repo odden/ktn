@@ -8,24 +8,28 @@ class Client:
     This is the chat client class
     """
 
-    def __init__(self):
+    def __init__(self, host, server_port):
         """
         This method is run when creating a new Client object
         """
 
         # Set up the socket connection to the server
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.run()
+        #self.run()
 
         # TODO: Finish init process with necessary code
 
 
-    def run(self, host, server_port):
+    def run(self):
         # Initiate the connection to the server
-        self.__init__()
-        print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
+        #self.__init__()
         self.connection.connect((self.host, self.server_port))
+        self.thread = threading.Thread(target = self.receive_message)
+        self.thread.setDeamon(True)
+        self.thread.start()
 
+        print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
+        
         self.logged_in = False
 
         while not logged_in:
@@ -33,10 +37,6 @@ class Client:
             self.login()
             resp = self.connection.recv(1024).strip()
             self.handle_json(resp)
-
-        self.thread = threading.Thread(target = self.receive_message)
-        self.thread.setDeamon(True)
-        self.thread.start()
 
         while logged_in:
             receive_message()
@@ -62,7 +62,7 @@ class Client:
         # TODO: Handle sending of a payload
         data = raw_input("Type something: ")
         self.connection.sendall(data)
-        self.send(self.parse({'request':'msg', 'content' }))
+        self.send(self.parse({'request':'msg', 'content':data }))
 
     def parse(self, data):
         return json.dumps(data)
