@@ -9,7 +9,7 @@ class Client:
     This is the chat client class
     """
 
-    def __init__(self): #(self, host, server_port):
+    def __init__(self, host, server_port): #(self, host, server_port):
         """
         This method is run when creating a new Client object
         """
@@ -21,14 +21,14 @@ class Client:
         # TODO: Finish init process with necessary code
 
 
-    def run(self, host, server_port):
+    def run(self):
         # Initiate the connection to the server
         #self.__init__()
-        self.connection.connect((host, server_port)) #((self.host, self.server_port))
+        self.connection.connect((self.host, self.server_port))
 
-        thread = MessageReceiver(client, self.connection)           #self.?
-        thread.daemon = True                                        #self.?
-        thread.start()                                              #self.?
+        thread = MessageReceiver(client, self.connection)
+        thread.daemon = True
+        thread.start()
 
         print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
         print "Received thread: " + thread.name
@@ -68,7 +68,7 @@ class Client:
         elif response.get('response') == 'msg':
             print response.get('msg')
 
-    def send(self, command):
+    def send(self, data):
         if data.startswith("login"):
             try:
                 username = data.split()[1]
@@ -137,8 +137,7 @@ if __name__ == '__main__':
 
     No alterations is necessary
     """
-    client = Client()
-    client.run('localhost', 9998)
+    client = Client('localhost', 9990)
 
     while True:
         msg = raw_input('')
@@ -147,4 +146,4 @@ if __name__ == '__main__':
         if msg == 'exit':
             break
 
-    client.disconnect()
+    #client.disconnect()
