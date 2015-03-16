@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import socket
-import threading
+#import threading
 import json
+import MessageReceiver
 
 class Client:
     """
     This is the chat client class
     """
 
-    def __init__(self, host, server_port):
+    def __init__(self): #(self, host, server_port):
         """
         This method is run when creating a new Client object
         """
@@ -20,79 +21,113 @@ class Client:
         # TODO: Finish init process with necessary code
 
 
-    def run(self):
+    def run(self, host, server_port):
         # Initiate the connection to the server
         #self.__init__()
-        self.connection.connect((self.host, self.server_port))
-        self.thread = threading.Thread(target = self.receive_message)
-        self.thread.setDeamon(True)
-        self.thread.start()
+        self.connection.connect((host, server_port)) #((self.host, self.server_port))
+
+        thread = MessageReceiver(client, self.connection)           #self.?
+        thread.daemon = True                                        #self.?
+        thread.start()                                              #self.?
 
         print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
+        print "Received thread: " + thread.name
         
         self.logged_in = False
 
-        while not logged_in:
-            self.username = raw_input('Username: ')
-            self.login()
-            resp = self.connection.recv(1024).strip()
-            self.handle_json(resp)
+        # while not logged_in:
+        #     self.username = raw_input('Username: ')
+        #     self.login()
+        #     resp = self.connection.recv(1024).strip()
+        #     self.handle_json(resp)
 
-        while logged_in:
-            receive_message()
+        # while logged_in:
+        #     receive_message()
 
-        self.connection.close()
+        # self.connection.close()
 
 
-    def login(self):
-        self.send(self.parse({'request':'login', 'username':self.username}))
-        logged_in = True
+    # def login(self):
+    #     self.send(self.parse({'request':'login', 'username':self.username}))
+    #     logged_in = True
+
+    # def disconnect(self):
+    #     # TODO: Handle disconnection
+    #     self.send(self.parse({'request':'logout'}))
+
+    def receive_message(self, msg, connection):
+        # TODO: Handle incoming message
+        response = json.loads(msg)
+
+        if response.get('response') == 'login':
+            print "Welcome, " + response.get('username') + ", to AwzmChat<3 "
+            for msg in response.get('msg_history'):
+                print msg
+        elif response.get('response') == 'logout':
+            print "Byebye " + response.get('username')
+        elif response.get('response') == 'msg':
+            print response.get('msg')
+
+    def send(self, command):
+        if data.startswith("login"):
+            try:
+                username = data.split()[1]
+            except IndexError:
+                username = ""
+            data = {'request': 'login', 'username': username}
+        elif data.startswith("logout"):
+            data = {'request': 'logout'}
+        elif data.startswith("names"):
+            data = {'request': 'names'}
+        elif data.startswith("help"):
+            data = {'request':'help'}
+        else:
+            data = {'request': 'msg', 'msg': data}
+
+        self.connection.sendall(json.dumps(data))
 
     def disconnect(self):
-        # TODO: Handle disconnection
-        self.send(self.parse({'request':'logout'}))
+        self.connection.close()
 
-    def receive_message(self, message):
-        # TODO: Handle incoming message
-        while():
-            received = self.connection.recv(1024).strip()
-            self.process_json(received)            
+        # while():
+        #     received = self.connection.recv(1024).strip()
+        #     self.process_json(received)            
 
-    def send_payload(self, data):
-        # TODO: Handle sending of a payload
-        data = raw_input("Type something: ")
-        self.connection.sendall(data)
-        self.send(self.parse({'request':'msg', 'content':data }))
+    # def send_payload(self, data):
+    #     # TODO: Handle sending of a payload
+    #     data = raw_input("Type something: ")
+    #     self.connection.sendall(data)
+    #     self.send(self.parse({'request':'msg', 'content':data }))
 
-    def parse(self, data):
-        return json.dumps(data)
+    # def parse(self, data):
+    #     return json.dumps(data)
 
-    def handle_json(self, data):
-        index = 0
-        while data.find("{", index) >= 0:
-            start = data.find("{", index)
-            end = data.find("}", start)
-            index = end
-            self.handle_data(data[start:end+1])
+    # def handle_json(self, data):
+    #     index = 0
+    #     while data.find("{", index) >= 0:
+    #         start = data.find("{", index)
+    #         end = data.find("}", start)
+    #         index = end
+    #         self.handle_data(data[start:end+1])
     
-    def handle_data(self, data):
-        decoded = json.loads(data)
-        if decoded.get("response", "") == "login":
-            if decoded.get("error", "") != "":
-                print decoded["error"], "(%s)"%decoded.get("username", "")
-            else:
-                self.logged_in = True
-            if decoded.get("messages", "") != "":
-                print decoded["messages"].encode('utf-8')
+    # def handle_data(self, data):
+    #     decoded = json.loads(data)
+    #     if decoded.get("response", "") == "login":
+    #         if decoded.get("error", "") != "":
+    #             print decoded["error"], "(%s)"%decoded.get("username", "")
+    #         else:
+    #             self.logged_in = True
+    #         if decoded.get("messages", "") != "":
+    #             print decoded["messages"].encode('utf-8')
 
-        if not self.logged_in:
-            return
+    #     if not self.logged_in:
+    #         return
         
-        if decoded.get("response", "") == "logout":
-            self.logged_in = False
+    #     if decoded.get("response", "") == "logout":
+    #         self.logged_in = False
 
-        if decoded.get("response", "") == "message":
-            print decoded["message"].encode('utf-8')
+    #     if decoded.get("response", "") == "message":
+    #         print decoded["message"].encode('utf-8')
 
 
 if __name__ == '__main__':
@@ -102,4 +137,14 @@ if __name__ == '__main__':
 
     No alterations is necessary
     """
-    client = Client('localhost', 9998)
+    client = Client()
+    client.run('localhost', 9998)
+
+    while True:
+        msg = raw_input('')
+        client.send(msg)
+
+        if msg == 'exit':
+            break
+
+    client.disconnect()
