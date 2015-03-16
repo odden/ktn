@@ -49,6 +49,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     self.getNames()
                 elif request == 'help':
                     return "geiegohruuhiegr"
+                elif request == 'module':
+                    print hei
                 else:
                     return "you suck"
 
@@ -148,7 +150,7 @@ if __name__ == "__main__":
 
     No alterations is necessary
     """
-    HOST, PORT = 'localhost', 9996
+    HOST, PORT = 'localhost', 9998
     print 'Server running...'
 
     # Set up and initiate the TCP server
