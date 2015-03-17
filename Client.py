@@ -2,14 +2,14 @@
 import socket
 #import threading
 import json
-import MessageReceiver
+from MessageReceiver import MessageReceiver
 
-class Client:
+class Client(object):
     """
     This is the chat client class
     """
 
-    def __init__(self, host, server_port): #(self, host, server_port):
+    def __init__(self): #(self, host, server_port):
         """
         This method is run when creating a new Client object
         """
@@ -21,10 +21,10 @@ class Client:
         # TODO: Finish init process with necessary code
 
 
-    def run(self):
+    def run(self, host, server_port):
         # Initiate the connection to the server
         #self.__init__()
-        self.connection.connect((self.host, self.server_port))
+        self.connection.connect((host, server_port))
 
         thread = MessageReceiver(client, self.connection)
         thread.daemon = True
@@ -33,7 +33,7 @@ class Client:
         print "Welcome to AwzmChat<3 write something awezome - aand be awezome."
         print "Received thread: " + thread.name
         
-        self.logged_in = False
+        #self.logged_in = False
 
         # while not logged_in:
         #     self.username = raw_input('Username: ')
@@ -59,7 +59,7 @@ class Client:
         # TODO: Handle incoming message
         response = json.loads(msg)
 
-        if response.get('response') == 'login':
+        if response.get('response') == '/login':
             print "Welcome, " + response.get('username') + ", to AwzmChat<3 "
             for msg in response.get('msg_history'):
                 print msg
@@ -137,7 +137,9 @@ if __name__ == '__main__':
 
     No alterations is necessary
     """
-    client = Client('localhost', 9990)
+    client = Client()
+    client.run('localhost', 9999)
+
 
     while True:
         msg = raw_input('')
@@ -146,4 +148,4 @@ if __name__ == '__main__':
         if msg == 'exit':
             break
 
-    #client.disconnect()
+    client.disconnect()

@@ -40,6 +40,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 #print(received_string)
                 #self.handle_data(received_string)
                 if request == 'login':
+                    print 'logging in'
                     self.login(jsonObject)
                 elif request == 'logout':
                     self.logout()
@@ -49,8 +50,6 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     self.getNames()
                 elif request == 'help':
                     return "geiegohruuhiegr"
-                elif request == 'module':
-                    print hei
                 else:
                     return "you suck"
 
@@ -151,7 +150,7 @@ if __name__ == "__main__":
     No alterations is necessary
     """
 
-    HOST, PORT = 'localhost', 9990
+    HOST, PORT = 'localhost', 9999
 
     print 'Server running...'
 
