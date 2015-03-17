@@ -5,8 +5,8 @@ from datetime import datetime
 import json
 import re
 
-msg_history = []
-active_users = []
+#msg_history = []
+#active_users = []
 
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
@@ -16,8 +16,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
 
-    global active_users
-    global msg_history
+    #global active_users
+    #global msg_history
 
     def printPretty(self, username, message):
         return timestamp() + " " + username + " | " + message
@@ -29,7 +29,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
-        self.logged_in = False
+        #self.logged_in = False
 
         # Loop that listens for messages from the client
         while True:
@@ -67,8 +67,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         return str(datetime.now().strftime('%Y/%m/%d %H:%M'))
 
     #broadcasts data to all connected clients
-    def broadcast(self, data):
-        msg_history.append(data)
+    #def broadcast(self, data):
+    #   msg_history.append(data)
 
     def login(self, jsonObject):
         username = jsonObject.get('username')
@@ -136,9 +136,11 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     No alterations is necessary
     """
     allow_reuse_address = True
+    messages = []
+    users = {}
 
     def broadcast(self, message):
-        for user in self.active_users:
+        for user in self.users:
             user.sendall(message)
  
 
